@@ -10,6 +10,7 @@ public class ClipRenderer extends JPanel implements ListCellRenderer<JSONObject>
     //Initialize the parts of the cell here to help with performance.
     JLabel id = new JLabel( "ID" );
     JLabel value = new JLabel( "VALUE" );
+    JSeparator vert = new JSeparator( JSeparator.VERTICAL );
 
     public ClipRenderer () {
         setLayout( new FlowLayout( FlowLayout.LEFT ) );
@@ -24,8 +25,13 @@ public class ClipRenderer extends JPanel implements ListCellRenderer<JSONObject>
 
     //Override method that actually displays what will be rendered inside each of the list items.
     @Override
-    public Component getListCellRendererComponent(JList<? extends JSONObject> jList, JSONObject clip, int i, boolean b, boolean b1) {
+    public Component getListCellRendererComponent(JList<? extends JSONObject> jList, JSONObject clip, int i, boolean isSelected, boolean hasFocus) {
         removeAll();
+        setBackground( Color.WHITE );
+
+        if ( isSelected ) {
+            setBackground( Color.decode("#EDEDED") );
+        }
 
         try {
             id.setText( String.valueOf( clip.getInt( "id" ) + 1 ) + ".  " );
@@ -35,6 +41,7 @@ public class ClipRenderer extends JPanel implements ListCellRenderer<JSONObject>
         }
 
         add( id );
+        add( vert );
         add( value );
 
         return this;

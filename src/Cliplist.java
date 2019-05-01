@@ -23,9 +23,7 @@ public class Cliplist extends JList< JSONObject > {
             public void mousePressed(MouseEvent mouseEvent) {
                 //Make sure we find something that is actually in the list.
                 if ( locationToIndex( mouseEvent.getPoint() ) != -1 ) {
-                    Object obj = getModel().getElementAt( locationToIndex( mouseEvent.getPoint() ) );
 
-                    System.out.println( obj.toString() );
                 }
             }
 

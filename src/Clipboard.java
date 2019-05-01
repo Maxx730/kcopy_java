@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.util.Timer;
 import java.util.TimerTask;
 
