@@ -16,7 +16,7 @@ public class Data {
 
     public void CreateDatabase () {
         try {
-            this.output = new FileOutputStream( "../kcopy.data" );
+            this.output = new FileOutputStream( "clips.data" );
             String test = "{" +
                     "clips:[]" +
                     "}";
@@ -32,13 +32,12 @@ public class Data {
         }
     }
 
-
     public JSONArray GetClips () {
         JSONArray clips = new JSONArray();
 
         try {
             //Read the database file.
-            File fil = new File( "../kcopy.data" );
+            File fil = new File( "clips.data" );
             FileReader read = new FileReader( fil );
 
             int i;
@@ -61,7 +60,7 @@ public class Data {
 
     public void UpdateData ( JSONArray clips ) {
         try {
-            FileOutputStream out = new FileOutputStream( "../kcopy.data" );
+            FileOutputStream out = new FileOutputStream( "clips.data" );
             data.put( "clips",clips );
 
             try {

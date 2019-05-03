@@ -6,11 +6,14 @@ public class AboutWindow extends JFrame {
 
     public AboutWindow () {
         setTitle( "About" );
-        setLayout( new GridLayout( 4,1 ) );
+        setLayout( new GridLayout( 6,1 ) );
         setMinimumSize( new Dimension( 300,160 ) );
+        setMaximumSize( new Dimension( 300,160 ) );
 
         GridBagConstraints constraints = new GridBagConstraints();
 
+        getContentPane().add( new JPanel() );
+        getContentPane().add( new JPanel() );
         getContentPane().add( new JLabel( "Version 1.0.0",SwingConstants.CENTER ) );
         getContentPane().add( new JLabel( "Created by John M Kinghorn",SwingConstants.CENTER ) );
         setVisible( true );

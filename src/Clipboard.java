@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,6 +35,12 @@ public class Clipboard {
                 System.out.println( "ERROR: " + e.getMessage() );
             }
         }
+    }
+
+    //Sets the given string value into the system clipboard.
+    public void SetClip ( String value ) {
+        StringSelection selection = new StringSelection( value );
+        board.setContents( selection,selection );
     }
 }
 

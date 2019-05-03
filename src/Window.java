@@ -5,6 +5,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,7 +17,7 @@ public class Window {
     private Container container;
     private JMenuItem about,preferences,imp,exp;
     private HintField searchField;
-    private JPanel searchPanel,clipPanel;
+    private JPanel searchPanel,clipPanel,favoritesPanel;
     private TopPane topPanel;
     private Cliplist list;
     private GridBagConstraints constraints;
@@ -45,6 +47,7 @@ public class Window {
                 try {
                     newClip.put( "id",clips.length() );
                     newClip.put( "value",value );
+                    newClip.put( "favorite",false );
 
                     clips.put( newClip );
                     list.SetClips( clips );
@@ -53,15 +56,14 @@ public class Window {
                     timout.schedule( new TimerTask() {
                         @Override
                         public void run() {
-                            ShowNotificationPanel();
+                            ShowNotificationPanel( value );
                         }
-                    },1000);
+                    },0);
                 } catch ( Exception e ) {
                     System.out.println( e.getMessage() );
                 }
             }
         });
-
 
         //Check if this is the first time running the application,
         //if so we want to create the database for holding all our clips.
@@ -75,7 +77,12 @@ public class Window {
         timout = new Timer();
 
         //Next we want to read the data from the database and store the JSONObjects into an array.
-        this.list = new Cliplist();
+        this.list = new Cliplist(new ChangeInterface() {
+            @Override
+            public void BoardChanged(String value) {
+                clipboard.SetClip( value );
+            }
+        });
         clips = data.GetClips();
         this.list.SetClips( clips );
 
@@ -105,7 +112,18 @@ public class Window {
         this.preferences.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                PreferenceWindow pref_window = new PreferenceWindow();
+                PreferenceWindow pref_window = new PreferenceWindow(new DataInterface() {
+                    @Override
+                    public void DataClear() {
+                        //Create a new database to clear all the clips.
+                        data.CreateDatabase();
+                        //Clear out the clips list.
+                        clips = new JSONArray();
+                        data.UpdateData( clips );
+                        //Empty the list in the UI
+                        list.SetClips( clips );
+                    }
+                });
             }
         });
 
@@ -115,6 +133,7 @@ public class Window {
         this.searchPanel = new JPanel();
         this.topPanel = new TopPane();
         this.clipPanel = new JPanel( new GridBagLayout() );
+        this.favoritesPanel = new JPanel( new GridLayout() );
 
         //LAYOUT CONSTRAINTS
         //Constraints to fill horizontally
@@ -128,7 +147,12 @@ public class Window {
         this.scrollpane = new JScrollPane();
         this.scrollpane.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
         this.scrollpane.setViewportBorder( null );
-        this.clipPanel.add( this.scrollpane,this.constraints );
+
+        //Create our tabs widget to house the favorites and clips panels
+        ClipTabs tabs = new ClipTabs( JTabbedPane.TOP );
+        tabs.AddTab( " Clips  ",this.scrollpane );
+        tabs.AddTab( " Favorites  ",this.favoritesPanel );
+        this.clipPanel.add( tabs,this.constraints );
 
 
         this.searchField = new HintField( 20 );
@@ -140,7 +164,18 @@ public class Window {
 
         this.container.setLayout( new BorderLayout( 10,0 ) );
 
+        //Logic for search entry field
         this.topPanel.Add( this.searchField );
+        this.searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                super.keyTyped(e);
+
+                //Call a search function that will rerender the list based on the
+                //given value.
+
+            }
+        });
 
         //Add all our content to the main window
         frame.setJMenuBar( this.menu );
@@ -155,13 +190,17 @@ public class Window {
 
         HideNotificationPanel();
 
-        frame.setBounds( 0,0,400,600 );
+        Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+
+        frame.setBounds( 0,0,500,600 );
+        frame.setLocation( (d.width / 2) - (frame.getSize().width / 2),(d.height / 2) - (frame.getSize().height/2) );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         frame.setVisible( true );
     }
 
-    private void ShowNotificationPanel () {
+    private void ShowNotificationPanel ( String value ) {
         System.out.println( "SHOWING NOTIFICATION PANEL" );
+        notif_panel.SetMessage( value );
         frame.add( notif_panel,BorderLayout.SOUTH );
         frame.revalidate();
 

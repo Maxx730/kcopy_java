@@ -9,22 +9,28 @@ import java.awt.event.MouseListener;
 public class Cliplist extends JList< JSONObject > {
     private DefaultListModel< JSONObject > model;
 
-    public Cliplist () {
+    public Cliplist ( ChangeInterface change ) {
         super();
         model = new DefaultListModel<>();
         setCellRenderer( new ClipRenderer() );
         this.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent mouseEvent) {
-
+                //Make sure we find something that is actually in the list.
+                if ( locationToIndex( mouseEvent.getPoint() ) != -1 ) {
+                    //Now we want to tell the clipboard to set the value for the given locaiton.
+                    try {
+                        JSONObject obj = getModel().getElementAt( locationToIndex( mouseEvent.getPoint() ) );
+                        change.BoardChanged( obj.getString("value" ) );
+                    } catch ( Exception e ) {
+                        System.out.println( e.getMessage() );
+                    }
+                }
             }
 
             @Override
             public void mousePressed(MouseEvent mouseEvent) {
-                //Make sure we find something that is actually in the list.
-                if ( locationToIndex( mouseEvent.getPoint() ) != -1 ) {
 
-                }
             }
 
             @Override

@@ -5,24 +5,24 @@ import java.awt.*;
 //when a clipboard item has been copied back into the clipboard.
 public class NotificationPanel extends JPanel {
 
-    JLabel message;
+    JLabel message = new JLabel( "TEST MESSAGE" );;
     ImageIcon notif_image,scaled,icon;
 
     public NotificationPanel () {
-        message = new JLabel( "TEST MESSAGE" );
+
         message.setBorder( BorderFactory.createEmptyBorder( 5,5,5,5 ) );
+        message.setPreferredSize( new Dimension( 350,30 ) );
         notif_image = new ImageIcon(new ImageIcon( this.getClass().getResource("/images" +
-                "/round_notification_important_black_18dp.png") ).getImage().getScaledInstance(16,16,
+                "/round_title_black_18dp.png") ).getImage().getScaledInstance(18,18,
                 Image.SCALE_SMOOTH));
 
 
         setLayout( new FlowLayout( FlowLayout.LEFT ) );
-        setBorder( BorderFactory.createMatteBorder( 1,0,0,0,Color.RED) );
         add( new JLabel( notif_image ) );
         add( message );
     }
 
     public void SetMessage ( String value ) {
-
+        message.setText( "'" + value + "' saved to history." );
     }
 }
