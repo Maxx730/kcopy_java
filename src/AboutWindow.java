@@ -4,7 +4,7 @@ import java.awt.*;
 //Window that displays information about the application.
 public class AboutWindow extends JFrame {
 
-    public AboutWindow () {
+    public AboutWindow ( JFrame reference ) {
         setTitle( "About" );
         setLayout( new GridLayout( 6,1 ) );
         setMinimumSize( new Dimension( 300,160 ) );
@@ -16,6 +16,8 @@ public class AboutWindow extends JFrame {
         getContentPane().add( new JPanel() );
         getContentPane().add( new JLabel( "Version 1.0.0",SwingConstants.CENTER ) );
         getContentPane().add( new JLabel( "Created by John M Kinghorn",SwingConstants.CENTER ) );
+
+        setLocationRelativeTo( reference );
         setVisible( true );
     }
 }

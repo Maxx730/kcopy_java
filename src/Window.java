@@ -82,7 +82,7 @@ public class Window {
             public void BoardChanged(String value) {
                 clipboard.SetClip( value );
             }
-        });
+        },frame );
         clips = data.GetClips();
         this.list.SetClips( clips );
 
@@ -105,7 +105,7 @@ public class Window {
         this.about.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                AboutWindow about = new AboutWindow();
+                AboutWindow about = new AboutWindow( frame );
             }
         });
         this.preferences = new JMenuItem( "Preferences",null );
@@ -123,7 +123,7 @@ public class Window {
                         //Empty the list in the UI
                         list.SetClips( clips );
                     }
-                });
+                },frame );
             }
         });
 

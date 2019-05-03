@@ -9,8 +9,10 @@ public class PreferenceWindow extends JFrame {
     private JComboBox < String > notifcation_length;
     private String[] choices = { "Short","Medium","Long" };
     private JPanel notification_panel = new JPanel();
+    private JPanel show_notif = new JPanel();
 
-    public PreferenceWindow ( DataInterface dat ) {
+
+    public PreferenceWindow ( DataInterface dat,JFrame reference ) {
         setTitle( "Preferences" );
         setBounds( 0,0,400,400 );
         setLayout( new GridLayout(10,1) );
@@ -63,6 +65,7 @@ public class PreferenceWindow extends JFrame {
                 confirm.add( text );
                 confirm.add( buttons );
                 confirm.setSize( 300,160 );
+                confirm.setLocationRelativeTo( reference );
                 confirm.setVisible( true );
             }
         });
@@ -78,14 +81,19 @@ public class PreferenceWindow extends JFrame {
 
         //Create the different panels that are going to be added to the
         //frame grid layout.
+        show_notif.setLayout( new FlowLayout() );
+        show_notif.add( new JLabel("Show Copy Notification" ) );
+
         notification_panel.setLayout( new FlowLayout() );
         notification_panel.add( new JLabel( "Notification Display Length" ) );
         notification_panel.add( notifcation_length );
 
+        add( show_notif );
         add( notification_panel );
         add( clear_button );
         add( reset_button );
         add( new JButton( "Apply" ) );
+        setLocationRelativeTo( frame );
         setVisible( true );
     }
 }
