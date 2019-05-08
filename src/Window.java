@@ -1,22 +1,23 @@
 
+import com.boxysystems.jgoogleanalytics.FocusPoint;
+import com.boxysystems.jgoogleanalytics.JGoogleAnalyticsTracker;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Window {
     private JFrame frame;
     private JMenuBar menu;
-    private JMenu edit,file;
+    private JMenu edit,file,help;
     private Container container;
     private JMenuItem about,preferences,imp,exp;
-    private HintField searchField;
     private JPanel searchPanel,clipPanel,favoritesPanel;
     private TopPane topPanel;
     private Cliplist list;
@@ -24,6 +25,7 @@ public class Window {
     private Data data;
     private JScrollPane scrollpane;
     private Timer timout;
+    private JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("kCopy","1.0.0","UA-85720731-3");
 
     //List of clip objects
     private JSONArray clips;
@@ -31,6 +33,11 @@ public class Window {
     private NotificationPanel notif_panel;
 
     public Window () {
+        Preferences.ClearPrefs();
+        //Test Google analytics tracking...
+        FocusPoint focus = new FocusPoint( "kCopy Open" );
+        tracker.trackAsynchronously( focus );
+
         try {
             UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
         } catch ( Exception e ) {
@@ -48,6 +55,7 @@ public class Window {
                     newClip.put( "id",clips.length() );
                     newClip.put( "value",value );
                     newClip.put( "favorite",false );
+                    newClip.put( "date",new Date().toString() );
 
                     clips.put( newClip );
                     list.SetClips( clips );
@@ -59,6 +67,8 @@ public class Window {
                             ShowNotificationPanel( value );
                         }
                     },0);
+                    FocusPoint focus = new FocusPoint( "Clip Copied" );
+                    tracker.trackAsynchronously( focus );
                 } catch ( Exception e ) {
                     System.out.println( e.getMessage() );
                 }
@@ -71,6 +81,8 @@ public class Window {
             System.out.println( "FIRST RUN, CREATING DATABASE NOW" );
             data.CreateDatabase();
             Preferences.SavePrefBoolean( "first-run",true );
+            Preferences.SavePrefBoolean( "show-notification", true );
+            Preferences.SavePrefString( "notification-length","short" );
         }
 
         //Initialize the timer used for showing and hiding the notification panel.
@@ -91,24 +103,36 @@ public class Window {
         this.frame.setMinimumSize( new Dimension( 400,400 ) );
         this.menu = new JMenuBar();
 
+        Border spacing = BorderFactory.createEmptyBorder( 10,16,10,16 );
+
         //Create our top level menu items.
         this.file = new JMenu( "File" );
-        this.file.setBorder( BorderFactory.createEmptyBorder( 5,5,5,5 ) );
-        this.imp = new JMenuItem( "Import" );
-        this.exp = new JMenuItem( "Export" );
+        this.file.setBorder( spacing );
+        this.imp = new JMenuItem( "  Save",
+                new ImageIcon( new ImageIcon( this.getClass().getResource( "images/round_save_black_18dp.png" )).getImage().getScaledInstance( 18,18,Image.SCALE_SMOOTH )) );
+        this.imp.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
+        this.exp = new JMenuItem( "  Open",new ImageIcon( new ImageIcon( this.getClass().getResource( "images" +
+                "/round_folder_black_18dp.png" )).getImage().getScaledInstance( 18,18,Image.SCALE_SMOOTH )) );
+        this.exp.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
         this.file.add( imp );
         this.file.add( exp );
 
         //Add the edit menu with submenu items.
         this.edit = new JMenu( "Edit" );
-        this.about = new JMenuItem( "About", null );
+        this.edit.setBorder( spacing );
+        this.about = new JMenuItem( "  About",new ImageIcon( new ImageIcon( this.getClass().getResource(
+                "images" +
+                        "/round_person_black_18dp.png" )).getImage().getScaledInstance( 18,18,Image.SCALE_SMOOTH )) );
+        this.about.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
         this.about.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 AboutWindow about = new AboutWindow( frame );
             }
         });
-        this.preferences = new JMenuItem( "Preferences",null );
+        this.preferences = new JMenu( "  Preferences" );
+        BuildPreferenceMenu( this.preferences );
+        this.preferences.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
         this.preferences.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -122,10 +146,16 @@ public class Window {
                         data.UpdateData( clips );
                         //Empty the list in the UI
                         list.SetClips( clips );
+                        FocusPoint focus = new FocusPoint( "Preferences Opened" );
+                        tracker.trackAsynchronously( focus );
                     }
                 },frame );
             }
         });
+
+        //Create the help menu
+        this.help = new JMenu("Help" );
+        this.help.setBorder( spacing );
 
         //Grab the actual content in the window below the menu.
         this.container = this.frame.getContentPane();
@@ -154,28 +184,14 @@ public class Window {
         tabs.AddTab( " Favorites  ",this.favoritesPanel );
         this.clipPanel.add( tabs,this.constraints );
 
-
-        this.searchField = new HintField( 20 );
         this.scrollpane.setViewportView( this.list );
-        this.edit.add( this.about );
+        this.help.add( this.about );
         this.edit.add( this.preferences );
         this.menu.add( this.file );
         this.menu.add( this.edit );
+        this.menu.add( this.help );
 
         this.container.setLayout( new BorderLayout( 10,0 ) );
-
-        //Logic for search entry field
-        this.topPanel.Add( this.searchField );
-        this.searchField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                super.keyTyped(e);
-
-                //Call a search function that will rerender the list based on the
-                //given value.
-
-            }
-        });
 
         //Add all our content to the main window
         frame.setJMenuBar( this.menu );
@@ -215,5 +231,57 @@ public class Window {
     private void HideNotificationPanel () {
        frame.remove( notif_panel );
        frame.revalidate();
+    }
+
+    //Takes in the root menu item and builds out all the preference options.
+    private void BuildPreferenceMenu( JMenuItem prefs ) {
+        Border space = BorderFactory.createEmptyBorder( 8,10,8,10 );
+        JCheckBoxMenuItem show_notif = new JCheckBoxMenuItem( "Notifications" );
+        JMenuItem clear_hist = new JMenuItem( "Clear History" );
+        JMenu notification_length = new JMenu( "Notification Duration" );
+        ButtonGroup group = new ButtonGroup();
+
+        //Create length radio buttons.
+        JRadioButtonMenuItem shorter = new JRadioButtonMenuItem( "Short" );
+        JRadioButtonMenuItem medium = new JRadioButtonMenuItem( "Medium" );
+        JRadioButtonMenuItem longer = new JRadioButtonMenuItem( "Long" );
+
+        group.add( shorter );
+        group.add( medium );
+        group.add( longer );
+
+        //Check our prefs here to display ticked on settings etc.
+        if ( Preferences.GetPrefBool( "show-notification" ) ) {
+            show_notif.setState( true );
+        }
+
+        switch ( Preferences.GetPrefString( "notification-length" ) ) {
+            case "medium":
+                medium.setSelected( true );
+                break;
+            case "longer":
+                longer.setSelected( true );
+                break;
+                default:
+                    shorter.setSelected( true );
+                    break;
+        }
+
+        show_notif.setBorder( space );
+        clear_hist.setBorder( space );
+        shorter.setBorder( space );
+        medium.setBorder( space );
+        longer.setBorder( space );
+        notification_length.setBorder( space );
+
+        //Add Sub menu items.
+        notification_length.add( shorter );
+        notification_length.add( medium );
+        notification_length.add( longer );
+
+        prefs.add( show_notif );
+        prefs.add( notification_length );
+        prefs.add( new JSeparator(SwingConstants.HORIZONTAL) );
+        prefs.add( clear_hist );
     }
 }

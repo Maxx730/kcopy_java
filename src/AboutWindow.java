@@ -7,15 +7,16 @@ public class AboutWindow extends JFrame {
     public AboutWindow ( JFrame reference ) {
         setTitle( "About" );
         setLayout( new GridLayout( 6,1 ) );
-        setMinimumSize( new Dimension( 300,160 ) );
-        setMaximumSize( new Dimension( 300,160 ) );
+        setSize( new Dimension( 300,200 ) );
+        setResizable( false );
 
         GridBagConstraints constraints = new GridBagConstraints();
 
         getContentPane().add( new JPanel() );
-        getContentPane().add( new JPanel() );
+        getContentPane().add( new JPanel().add( new JLabel( new ImageIcon( this.getClass().getResource( "images" +
+                "/round_person_black_18dp.png" ) ) ) ) );
         getContentPane().add( new JLabel( "Version 1.0.0",SwingConstants.CENTER ) );
-        getContentPane().add( new JLabel( "Created by John M Kinghorn",SwingConstants.CENTER ) );
+        getContentPane().add( new JLabel( "Created by John M Kinghorn",SwingConstants   .CENTER ) );
 
         setLocationRelativeTo( reference );
         setVisible( true );

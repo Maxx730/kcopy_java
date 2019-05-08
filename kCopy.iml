@@ -25,5 +25,16 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="analytics" level="project" />
+    <orderEntry type="library" name="java" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Downloads/JGoogleAnalytics_0.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>

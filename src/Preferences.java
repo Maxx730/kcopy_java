@@ -8,6 +8,8 @@ public final class Preferences {
 
         //Reset all the preferences that can be set in this application.
         prefs.remove( "first-run" );
+        prefs.remove( "show-notification" );
+        prefs.remove( "notification-length" );
     }
 
     public static void SavePrefBoolean ( String name,boolean value ) {
@@ -17,6 +19,27 @@ public final class Preferences {
             prefs.putBoolean( name,value );
         } catch ( Exception e ) {
             System.out.println( e.getMessage() );
+        }
+    }
+
+    public static void SavePrefString( String name,String value ) {
+        prefs = java.util.prefs.Preferences.userRoot();
+
+        try {
+            prefs.put( name,value );
+        } catch ( Exception e ) {
+            System.out.println( e.getMessage() );
+        }
+    }
+
+    public static String GetPrefString( String name ) {
+        prefs = java.util.prefs.Preferences.userRoot();
+
+        try {
+            return prefs.get( name, "short" );
+        } catch ( Exception e ) {
+            System.out.println( e.getMessage() );
+            return "short";
         }
     }
 

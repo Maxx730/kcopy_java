@@ -3,10 +3,7 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.*;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -151,27 +148,49 @@ public class Cliplist extends JList< JSONObject > {
                         }
                     });
 
+                    dialog.setLocationRelativeTo( ref );
+                    dialog.setSize( new Dimension( 400,300 ) );
+                    dialog.setLayout( new BorderLayout() );
+                    dialog.setResizable( false );
+
                     try {
                         //Build out the dialog UI here for options on what to do with said clip.
                         JPanel clipValue = new JPanel();
-                        JTextArea clipHold = new JTextArea(  );
+                        JTextArea clipHold = new JTextArea( 10, dialog.getSize().width / 12 );
+                        JScrollPane scroll = new JScrollPane( clipHold,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
 
+                        scroll.setViewportBorder( BorderFactory.createEmptyBorder( 0,0,0,0 ) );
                         clipHold.setLineWrap( true );
-                        clipHold.setBorder( BorderFactory.createMatteBorder( 1,1,1,1,Color.ORANGE ));
+                        clipHold.setBorder( BorderFactory.createEmptyBorder( 10,10,10,10 ) );
                         clipHold.setText( clips.getJSONObject( ( clips.length() - 1) - clipID ).getString("value" ) );
 
-                        clipValue.setBackground( Color.WHITE );
-                        clipValue.setBorder( BorderFactory.createEmptyBorder( 10,10,10,10 ));
-                        //clipValue.add( new JLabel( clips.getJSONObject( ( clips.length() - 1) - clipID ).getString(
-                                //"value" ) ) );
-                        clipValue.add( clipHold );
-                        dialog.add( clipValue );
+                        clipValue.setBorder( BorderFactory.createEmptyBorder( 3,10,10,10 ));
+                        clipValue.add( scroll );
+
+                        //Create the action buttons below the clip textfield
+                        JPanel action_panel = new JPanel( new FlowLayout() );
+
+                        JButton close = new JButton( "Close" );
+                        close.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                dialog.setVisible( false );
+                                detailsOpen = false;
+                            }
+                        });
+
+                        action_panel.add( new JButton("Copy") );
+                        action_panel.add( new JButton("Favorite") );
+                        action_panel.add( close );
+
+                        //Add panels to the new dialog.
+                        dialog.add( clipValue,BorderLayout.NORTH );
+                        dialog.add( action_panel,BorderLayout.SOUTH );
                     } catch ( Exception e ) {
                         System.out.println( e.getMessage() );
                     }
 
-                    dialog.setLocationRelativeTo( ref );
-                    dialog.setSize( new Dimension( 400,200 ) );
                     dialog.setVisible( true );
                 }
             }

@@ -1,4 +1,7 @@
+import sun.java2d.loops.GeneralRenderer;
+
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,18 +13,20 @@ public class PreferenceWindow extends JFrame {
     private String[] choices = { "Short","Medium","Long" };
     private JPanel notification_panel = new JPanel();
     private JPanel show_notif = new JPanel();
+    private JPanel main_panel = new JPanel();
+    private JCheckBox show_notifcation = new JCheckBox("" );
+    private GridBagConstraints constraints;
 
 
     public PreferenceWindow ( DataInterface dat,JFrame reference ) {
         setTitle( "Preferences" );
-        setBounds( 0,0,400,400 );
-        setLayout( new GridLayout(10,1) );
+        setBounds( 0,0,600,400 );
+        setLayout( new GridBagLayout() );
+        this.constraints = new GridBagConstraints();
 
         //Create our preferences layouts and widgets here.
         clear_button = new JButton( "Clear History" );
-        notifcation_length = new JComboBox<>( choices );
         reset_button = new JButton( "Reset Preferences" );
-
         JFrame frame = this;
 
         //Actions defined here
@@ -79,20 +84,38 @@ public class PreferenceWindow extends JFrame {
             }
         });
 
-        //Create the different panels that are going to be added to the
-        //frame grid layout.
-        show_notif.setLayout( new FlowLayout() );
-        show_notif.add( new JLabel("Show Copy Notification" ) );
+        //Start building our layout with panels
+        //Initialize default constraints
+        this.constraints.gridx = 1;
+        this.constraints.gridy = 1;
+        this.constraints.gridwidth = 1;
+        this.constraints.gridheight = 1;
+        this.constraints.weighty = 1;
+        this.constraints.weightx = 1;
+        this.constraints.insets = new Insets( 5,5,5,5 );
+        this.constraints.anchor = GridBagConstraints.CENTER;
+        this.constraints.fill = GridBagConstraints.BOTH;
 
-        notification_panel.setLayout( new FlowLayout() );
-        notification_panel.add( new JLabel( "Notification Display Length" ) );
-        notification_panel.add( notifcation_length );
 
-        add( show_notif );
-        add( notification_panel );
-        add( clear_button );
-        add( reset_button );
-        add( new JButton( "Apply" ) );
+        //Panel 1
+        this.constraints.gridx = 1;
+        JPanel panel1 = new JPanel();
+        //Add preference labels here.
+        panel1.setLayout( new BoxLayout( panel1,BoxLayout.Y_AXIS ));
+        panel1.add( new JLabel( "Testing" ) );
+        panel1.add( new JLabel( "Testing" ) );
+        panel1.add( new JLabel( "Testing" ) );
+        panel1.add( new JSeparator( SwingConstants.HORIZONTAL ) );
+
+        add( panel1,this.constraints );
+
+        //Panel 2
+        this.constraints.gridx = 2;
+        this.constraints.weightx = 0.4;
+        JPanel panel2 = new JPanel();
+        panel2.setBackground( Color.RED );
+        add( panel2,this.constraints );
+
         setLocationRelativeTo( frame );
         setVisible( true );
     }
