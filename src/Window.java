@@ -33,7 +33,6 @@ public class Window {
     private NotificationPanel notif_panel;
 
     public Window () {
-        Preferences.ClearPrefs();
         //Test Google analytics tracking...
         FocusPoint focus = new FocusPoint( "kCopy Open" );
         tracker.trackAsynchronously( focus );
@@ -50,6 +49,7 @@ public class Window {
             @Override
             public void BoardChanged(String value) {
                 JSONObject newClip = new JSONObject();
+                Timer tim = new Timer();
 
                 try {
                     newClip.put( "id",clips.length() );
@@ -61,10 +61,12 @@ public class Window {
                     list.SetClips( clips );
                     data.UpdateData( clips );
 
-                    timout.schedule( new TimerTask() {
+                    tim.schedule( new TimerTask() {
                         @Override
                         public void run() {
                             ShowNotificationPanel( value );
+                            tim.cancel();
+                            tim.purge();
                         }
                     },0);
                     FocusPoint focus = new FocusPoint( "Clip Copied" );
