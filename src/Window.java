@@ -1,13 +1,13 @@
 
-import com.boxysystems.jgoogleanalytics.FocusPoint;
-import com.boxysystems.jgoogleanalytics.JGoogleAnalyticsTracker;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -17,7 +17,7 @@ public class Window {
     private JMenuBar menu;
     private JMenu edit,file,help;
     private Container container;
-    private JMenuItem about,preferences,imp,exp;
+    private JMenuItem about,preferences,imp,exp,exit;
     private JPanel searchPanel,clipPanel,favoritesPanel;
     private TopPane topPanel;
     private Cliplist list;
@@ -25,7 +25,6 @@ public class Window {
     private Data data;
     private JScrollPane scrollpane;
     private Timer timout;
-    private JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker("kCopy","1.0.0","UA-85720731-3");
 
     //List of clip objects
     private JSONArray clips;
@@ -33,9 +32,6 @@ public class Window {
     private NotificationPanel notif_panel;
 
     public Window () {
-        //Test Google analytics tracking...
-        FocusPoint focus = new FocusPoint( "kCopy Open" );
-        tracker.trackAsynchronously( focus );
 
         try {
             UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
@@ -64,13 +60,14 @@ public class Window {
                     tim.schedule( new TimerTask() {
                         @Override
                         public void run() {
-                            ShowNotificationPanel( value );
+                            if ( Preferences.GetPrefBool("show-notification" ) ) {
+                                ShowNotificationPanel( value );
+                            }
+
                             tim.cancel();
                             tim.purge();
                         }
                     },0);
-                    FocusPoint focus = new FocusPoint( "Clip Copied" );
-                    tracker.trackAsynchronously( focus );
                 } catch ( Exception e ) {
                     System.out.println( e.getMessage() );
                 }
@@ -105,27 +102,66 @@ public class Window {
         this.frame.setMinimumSize( new Dimension( 400,400 ) );
         this.menu = new JMenuBar();
 
-        Border spacing = BorderFactory.createEmptyBorder( 10,16,10,16 );
+        Border spacing = BorderFactory.createEmptyBorder( 8,10,8,10 );
 
         //Create our top level menu items.
         this.file = new JMenu( "File" );
         this.file.setBorder( spacing );
-        this.imp = new JMenuItem( "  Save",
-                new ImageIcon( new ImageIcon( this.getClass().getResource( "images/round_save_black_18dp.png" )).getImage().getScaledInstance( 18,18,Image.SCALE_SMOOTH )) );
-        this.imp.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
-        this.exp = new JMenuItem( "  Open",new ImageIcon( new ImageIcon( this.getClass().getResource( "images" +
-                "/round_folder_black_18dp.png" )).getImage().getScaledInstance( 18,18,Image.SCALE_SMOOTH )) );
-        this.exp.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
+        this.imp = new JMenuItem( "Save          Ctrl+S" );
+        this.imp.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
+        this.exp = new JMenuItem( "Open          Ctrl+O");
+        this.exp.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
+        this.exit = new JMenuItem( "Exit" );
+
+        //First menu action listeners.
+        this.exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                frame.setVisible( false );
+                frame.dispose();
+            }
+        });
+
+        this.imp.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Default the chooser path to whatever the home directory for the user is.
+                JFileChooser choose = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory() );
+                choose.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+
+                if ( choose.showSaveDialog( null ) == JFileChooser.APPROVE_OPTION ) {
+                    File selected = choose.getSelectedFile();
+                    //Now we want to write a backup of the json file to the said chosen directory.
+                    data.WriteBackup( selected,choose.getName() );
+                }
+            }
+        });
+
+        this.exp.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //Default the chooser path to whatever the home directory for the user is.
+                JFileChooser choose = new JFileChooser(FileSystemView.getFileSystemView().getHomeDirectory() );
+                choose.setFileSelectionMode( JFileChooser.FILES_ONLY );
+
+                if ( choose.showOpenDialog( null ) == JFileChooser.APPROVE_OPTION ) {
+                    File selected = choose.getSelectedFile();
+
+                    JDialog dia = new JDialog( frame,"Confirm" );
+                    dia.setVisible( true );
+                }
+            }
+        });
+
         this.file.add( imp );
         this.file.add( exp );
+        this.file.add( exit );
 
         //Add the edit menu with submenu items.
         this.edit = new JMenu( "Edit" );
         this.edit.setBorder( spacing );
-        this.about = new JMenuItem( "  About",new ImageIcon( new ImageIcon( this.getClass().getResource(
-                "images" +
-                        "/round_person_black_18dp.png" )).getImage().getScaledInstance( 18,18,Image.SCALE_SMOOTH )) );
-        this.about.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
+        this.about = new JMenuItem( "About" );
+        this.about.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
         this.about.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -134,7 +170,7 @@ public class Window {
         });
         this.preferences = new JMenu( "  Preferences" );
         BuildPreferenceMenu( this.preferences );
-        this.preferences.setBorder( BorderFactory.createEmptyBorder( 8,10,8,10 ));
+        this.preferences.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
         this.preferences.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -148,8 +184,6 @@ public class Window {
                         data.UpdateData( clips );
                         //Empty the list in the UI
                         list.SetClips( clips );
-                        FocusPoint focus = new FocusPoint( "Preferences Opened" );
-                        tracker.trackAsynchronously( focus );
                     }
                 },frame );
             }
@@ -163,7 +197,28 @@ public class Window {
         this.container = this.frame.getContentPane();
 
         this.searchPanel = new JPanel();
-        this.topPanel = new TopPane();
+        this.topPanel = new TopPane(new SearchInterface() {
+            //What needs to be done when something has been typed into the search field.
+            @Override
+            public void OnSearch(String value) {
+                JSONArray newClips = new JSONArray();
+
+                for ( int i = 0;i < clips.length();i++ ) {
+                    try  {
+                        JSONObject obj = clips.getJSONObject( i );
+
+                        if ( obj.getString("value").contains( value )) {
+                            newClips.put( clips.getJSONObject( i ) );
+                        }
+                    } catch ( Exception e ) {
+                        System.out.println( e.getMessage() );
+                    }
+                }
+
+                list.SetClips( newClips );
+            }
+        });
+
         this.clipPanel = new JPanel( new GridBagLayout() );
         this.favoritesPanel = new JPanel( new GridLayout() );
 
@@ -184,7 +239,7 @@ public class Window {
         ClipTabs tabs = new ClipTabs( JTabbedPane.TOP );
         tabs.AddTab( " Clips  ",this.scrollpane );
         tabs.AddTab( " Favorites  ",this.favoritesPanel );
-        this.clipPanel.add( tabs,this.constraints );
+        this.clipPanel.add( this.scrollpane,this.constraints );
 
         this.scrollpane.setViewportView( this.list );
         this.help.add( this.about );
@@ -217,17 +272,30 @@ public class Window {
     }
 
     private void ShowNotificationPanel ( String value ) {
-        System.out.println( "SHOWING NOTIFICATION PANEL" );
         notif_panel.SetMessage( value );
         frame.add( notif_panel,BorderLayout.SOUTH );
         frame.revalidate();
+
+        int delay = 1500;
+
+        switch ( Preferences.GetPrefString("notification-length" ) ) {
+            case "medium":
+                delay = 2500;
+                break;
+            case "longer":
+                delay = 3500;
+                break;
+            default:
+                delay = 1500;
+                break;
+        }
 
         timout.schedule(new TimerTask() {
             @Override
             public void run() {
                 HideNotificationPanel();
             }
-        },1500 );
+        },delay );
     }
 
     private void HideNotificationPanel () {
@@ -237,8 +305,17 @@ public class Window {
 
     //Takes in the root menu item and builds out all the preference options.
     private void BuildPreferenceMenu( JMenuItem prefs ) {
-        Border space = BorderFactory.createEmptyBorder( 8,10,8,10 );
+        Border space = BorderFactory.createEmptyBorder( 4,6,4,6 );
         JCheckBoxMenuItem show_notif = new JCheckBoxMenuItem( "Notifications" );
+
+        //What happens when the checkbox is checked or not checked etc.
+        show_notif.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Preferences.SavePrefBoolean( "show-notification",show_notif.getState() );
+            }
+        });
+
         JMenuItem clear_hist = new JMenuItem( "Clear History" );
         JMenu notification_length = new JMenu( "Notification Duration" );
         ButtonGroup group = new ButtonGroup();
@@ -251,6 +328,82 @@ public class Window {
         group.add( shorter );
         group.add( medium );
         group.add( longer );
+
+        shorter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Preferences.SavePrefString("notification-length","short" );
+            }
+        });
+
+        medium.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Preferences.SavePrefString("notification-length","medium" );
+            }
+        });
+
+        longer.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Preferences.SavePrefString("notification-length","longer" );
+            }
+        });
+
+        //Clear history action event.
+        clear_hist.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JDialog confirm = new JDialog( frame,"Confirm" );
+                confirm.setLayout( new FlowLayout() );
+                confirm.setResizable( false );
+                confirm.getContentPane().setBackground( Color.WHITE );
+
+                JPanel text = new JPanel();
+                text.setBackground( Color.WHITE );
+                text.setBorder( BorderFactory.createEmptyBorder( 10,10,10,10 ) );
+                text.add( new JLabel( "<html><div style=\"width:200px\"><center>Are you sure you would like to clear " +
+                        "the " +
+                        "clipboard " +
+                        "history?</center></div></html>" ) );
+
+                JPanel buttons = new JPanel( new FlowLayout() );
+                buttons.setBackground( Color.WHITE );
+                JButton cancel_dialog = new JButton( "Cancel" );
+                JButton confirm_clear = new JButton( "Confirm" );
+
+                //Close the dialog if the cancel button is pressed.
+                cancel_dialog.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        confirm.setVisible( false );
+                    }
+                });
+
+                confirm_clear.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        //Create a new database to clear all the clips.
+                        data.CreateDatabase();
+                        //Clear out the clips list.
+                        clips = new JSONArray();
+                        data.UpdateData( clips );
+                        //Empty the list in the UI
+                        list.SetClips( clips );
+                        confirm.setVisible( false );
+                    }
+                });
+
+                buttons.add( confirm_clear );
+                buttons.add( cancel_dialog );
+
+                confirm.add( text );
+                confirm.add( buttons );
+                confirm.setSize( 300,160 );
+                confirm.setLocationRelativeTo( frame );
+                confirm.setVisible( true );
+            }
+        });
 
         //Check our prefs here to display ticked on settings etc.
         if ( Preferences.GetPrefBool( "show-notification" ) ) {

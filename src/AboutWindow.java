@@ -9,10 +9,10 @@ public class AboutWindow extends JFrame {
         setLayout( new GridLayout( 6,1 ) );
         setSize( new Dimension( 300,200 ) );
         setResizable( false );
+        getContentPane().setBackground( Color.WHITE );
 
         GridBagConstraints constraints = new GridBagConstraints();
 
-        getContentPane().add( new JPanel() );
         getContentPane().add( new JPanel().add( new JLabel( new ImageIcon( this.getClass().getResource( "images" +
                 "/round_person_black_18dp.png" ) ) ) ) );
         getContentPane().add( new JLabel( "Version 1.0.0",SwingConstants.CENTER ) );

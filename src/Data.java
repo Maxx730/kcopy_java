@@ -73,4 +73,22 @@ public class Data {
             System.out.println( e.getMessage() );
         }
     }
+
+    //Takes in a file path and writes a backup of the json file to the given directory.
+    public void WriteBackup( File output,String filename ) {
+        try {
+            FileOutputStream out = new FileOutputStream( output.getPath() );
+
+            JSONArray clips = GetClips();
+
+            try {
+                byte[] bytes = clips.toString().getBytes();
+                out.write( bytes );
+            } catch( Exception e) {
+                System.out.println( e.getMessage() );
+            }
+        } catch( Exception e ) {
+            System.out.println( e.getMessage() );
+        }
+    }
 }
