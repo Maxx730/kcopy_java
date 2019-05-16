@@ -10,15 +10,17 @@ public class NotificationPanel extends JPanel {
 
     public NotificationPanel () {
 
-        message.setBorder( BorderFactory.createEmptyBorder( 5,5,5,5 ) );
-        message.setPreferredSize( new Dimension( 350,30 ) );
+        message.setBorder( BorderFactory.createEmptyBorder( 15,15,15,15 ) );
         notif_image = new ImageIcon(new ImageIcon( this.getClass().getResource("/images" +
-                "/round_title_black_18dp.png") ).getImage().getScaledInstance(18,18,
+                "/50.png") ).getImage().getScaledInstance(18,18,
                 Image.SCALE_SMOOTH));
+        JLabel icon = new JLabel( notif_image );
+        icon.setBorder( BorderFactory.createEmptyBorder( 10,10,10,10 ) );
 
-
+        setBackground( new Color( 0,0,0,100 ) );
+        setOpaque( true );
         setLayout( new FlowLayout( FlowLayout.LEFT ) );
-        add( new JLabel( notif_image ) );
+        add( icon );
         add( message );
     }
 

@@ -24,22 +24,11 @@ public class TopPane extends JPanel {
         this.lowerPanel.setLayout( new BoxLayout( lowerPanel,BoxLayout.X_AXIS ) );
         this.lowerPanel.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createMatteBorder( 1,0,0,0,
                 Color.decode("#C4C4C4") ),BorderFactory.createEmptyBorder( 6,8,6,10 ) ) );
-        this.clear_search =
-                new JButton( new ImageIcon( new ImageIcon( getClass().getResource("images" +
-                        "/round_youtube_searched_for_black_18dp.png" ) ).getImage().getScaledInstance( 24,24,
-                        Image.SCALE_SMOOTH) ) );
-        this.clear_search.setToolTipText( "Clear Search Results" );
-        this.refresh_list =
-                new JButton( new ImageIcon( new ImageIcon( getClass().getResource("images/round_cached_black_18dp" +
-                        ".png") ).getImage().getScaledInstance( 24,24,Image.SCALE_SMOOTH ) ) );
-        this.refresh_list.setToolTipText( "Refresh Clip List" );
-        this.lowerPanel.add( this.clear_search );
-        this.lowerPanel.add( this.refresh_list );
 
         //Panel that contains the actual search field.
         this.innerPannel = new JPanel();
         this.innerPannel.setLayout( new GridBagLayout() );
-        this.innerPannel.setBorder( BorderFactory.createEmptyBorder( 10,10,10,10 ));
+        this.innerPannel.setBorder( BorderFactory.createEmptyBorder( 10,0,10,10 ));
 
         this.constraints = new GridBagConstraints();
         this.constraints.weightx = 1;
@@ -82,9 +71,12 @@ public class TopPane extends JPanel {
             }
         });
 
+        ImageIcon search_icon = new ImageIcon( getClass().getResource("images/49.png"));
+
 
         this.add( this.innerPannel,BorderLayout.NORTH );
-        this.add( this.lowerPanel,BorderLayout.SOUTH );
+        this.innerPannel.add( new JLabel( search_icon ),this.constraints );
+        this.constraints.weightx = 12;
         this.innerPannel.add( this.search_field,this.constraints );
     }
 }
