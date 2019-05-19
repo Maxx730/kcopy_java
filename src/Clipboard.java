@@ -13,7 +13,7 @@ public class Clipboard {
     public Clipboard ( ChangeInterface changed ) {
         this.changed = changed;
         timer = new Timer();
-        timer.schedule( new PollTask(),0,500 );
+        timer.schedule( new PollTask(),0,100 );
     }
 
     private class PollTask extends TimerTask {
@@ -28,7 +28,7 @@ public class Clipboard {
                 //Make sure the current clip is not the same as the last clip.
                 if ( !board.getData( DataFlavor.stringFlavor ).toString().equals( lastClip ) ) {
                     //If the clip has changed then we want to run our board changed function
-                    changed.BoardChanged( board.getData( DataFlavor.stringFlavor ).toString() );
+                    changed.BoardChanged( board.getData( DataFlavor.stringFlavor ).toString(),true );
                     lastClip = board.getData( DataFlavor.stringFlavor ).toString();
                 }
             } catch ( Exception e ) {

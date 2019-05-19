@@ -7,8 +7,6 @@ import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.io.File;
 import java.util.Date;
 import java.util.Timer;
@@ -20,7 +18,7 @@ public class Window {
     private JMenu edit,file,help;
     private Container container;
     private JMenuItem about,preferences,imp,exp,exit;
-    private JPanel searchPanel,clipPanel,favoritesPanel;
+    private JPanel searchPanel,notificationPanel;
     private TopPane topPanel;
     private Cliplist list;
     private GridBagConstraints constraints;
@@ -28,6 +26,7 @@ public class Window {
     private JScrollPane scrollpane;
     private Timer timout;
     private JLayeredPane layered;
+    private JLabel notif_text,notif_message;
 
     //List of clip objects
     private JSONArray clips;
@@ -46,34 +45,36 @@ public class Window {
         data = new Data();
         clipboard = new Clipboard(new ChangeInterface() {
             @Override
-            public void BoardChanged(String value) {
+            public void BoardChanged(String value,boolean updateList) {
                 JSONObject newClip = new JSONObject();
                 Timer tim = new Timer();
 
-                try {
-                    newClip.put( "id",clips.length() );
-                    newClip.put( "value",value );
-                    newClip.put( "favorite",false );
-                    newClip.put( "date",new Date().toString() );
+                if (updateList) {
+                    try {
+                        newClip.put( "id",clips.length() );
+                        newClip.put( "value",value );
+                        newClip.put( "favorite",false );
+                        newClip.put( "date",new Date().toString() );
 
-                    clips.put( newClip );
-                    list.SetClips( clips );
-                    data.UpdateData( clips );
-
-                    tim.schedule( new TimerTask() {
-                        @Override
-                        public void run() {
-                            if ( Preferences.GetPrefBool("show-notification" ) ) {
-                                ShowNotificationPanel( value );
-                            }
-
-                            tim.cancel();
-                            tim.purge();
-                        }
-                    },0);
-                } catch ( Exception e ) {
-                    System.out.println( e.getMessage() );
+                        clips.put( newClip );
+                        list.SetClips(data.UpdateData( clips ));
+                    } catch ( Exception e ) {
+                        System.out.println( e.getMessage() );
+                    }
                 }
+
+                //Always show the notification even if the list is not updated.
+                tim.schedule( new TimerTask() {
+                    @Override
+                    public void run() {
+                        if ( Preferences.GetPrefBool("show-notification" ) ) {
+                            ShowNotificationPanel( value );
+                        }
+
+                        tim.cancel();
+                        tim.purge();
+                    }
+                },0);
             }
         });
 
@@ -93,10 +94,11 @@ public class Window {
         //Next we want to read the data from the database and store the JSONObjects into an array.
         this.list = new Cliplist(new ChangeInterface() {
             @Override
-            public void BoardChanged(String value) {
+            public void BoardChanged(String value,boolean updateList) {
                 clipboard.SetClip( value );
             }
         },frame );
+
         clips = data.GetClips();
         this.list.SetClips( clips );
 
@@ -118,7 +120,8 @@ public class Window {
         this.exp.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
         this.exp.setIcon(new ImageIcon( new ImageIcon( getClass().getResource("images/47" +
                 ".png") ).getImage().getScaledInstance( 16,16,Image.SCALE_SMOOTH )));
-        this.exit = new JMenuItem( "Exit" );
+        this.exit = new JMenuItem( " Exit" );
+        this.exit.setIcon( new ImageIcon( getClass().getResource( "images/50.png" ) ) );
 
         //First menu action listeners.
         this.exit.addActionListener(new ActionListener() {
@@ -126,6 +129,7 @@ public class Window {
             public void actionPerformed(ActionEvent e) {
                 frame.setVisible( false );
                 frame.dispose();
+                System.exit( 0 );
             }
         });
 
@@ -218,29 +222,6 @@ public class Window {
         this.container = this.frame.getContentPane();
         this.layered = new JLayeredPane();
 
-        //Events that are fired when re
-        frame.getRootPane().addComponentListener(new ComponentListener() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                System.out.println( "FRAME SIZE: " + e.getComponent().getSize().width + " x " + e.getComponent().getSize().height );
-            }
-
-            @Override
-            public void componentMoved(ComponentEvent e) {
-
-            }
-
-            @Override
-            public void componentShown(ComponentEvent e) {
-
-            }
-
-            @Override
-            public void componentHidden(ComponentEvent e) {
-
-            }
-        });
-
         //Create the top pane that contains the search functionality.
         this.searchPanel = new JPanel();
         this.topPanel = new TopPane(new SearchInterface() {
@@ -265,9 +246,6 @@ public class Window {
             }
         });
 
-        this.clipPanel = new JPanel( new GridBagLayout() );
-        this.favoritesPanel = new JPanel( new GridLayout() );
-
         //LAYOUT CONSTRAINTS
         //Constraints to fill horizontally
         this.constraints = new GridBagConstraints();
@@ -285,17 +263,28 @@ public class Window {
         //Create our tabs widget to house the favorites and clips panels
         ClipTabs tabs = new ClipTabs( JTabbedPane.TOP );
         tabs.AddTab( " Clips  ",this.scrollpane );
-        tabs.AddTab( " Favorites  ",this.favoritesPanel );
 
         this.layered.setBounds( 0,100,frame.getSize().width,
                 frame.getSize().height );
         this.layered.add( this.scrollpane, new Integer( 0 ), 0 );
 
-        JPanel test = new JPanel();
-        test.setSize( new Dimension( 100,100 ) );
-        test.setBackground( new Color( 0,0,0,180 ) );
-        test.setBounds( 0,frame.getSize().height - 180,frame.getSize().width,50 );
-        this.layered.add( test,new Integer( 1 ), 0);
+        //Creates the panel that will show the notification when it pops up.
+        this.notificationPanel = new JPanel();
+        this.notificationPanel.setSize( new Dimension( 100,100 ) );
+        this.notificationPanel.setBackground( new Color( 0,0,0,200 ) );
+        this.notificationPanel.setBounds( 0,frame.getSize().height - 170,frame.getSize().width,40 );
+        this.notificationPanel.setLayout( new BorderLayout() );
+
+        JLabel notif_frame = new JLabel(new ImageIcon( getClass().getResource("images/43.png") ) );
+        notif_frame.setBorder( BorderFactory.createEmptyBorder( 0,10,0,10 ) );
+        this.notif_text = new JLabel( "TESTING" );
+        this.notif_text.setForeground( Color.WHITE );
+
+        //Add the panel to the layered pane.
+        this.notificationPanel.add( notif_frame,BorderLayout.WEST );
+        this.notificationPanel.add( this.notif_text,BorderLayout.CENTER );
+        this.layered.add( this.notificationPanel,new Integer( 1 ), 0);
+        HideNotificationPanel();
 
         this.scrollpane.setViewportView( this.list );
         this.help.add( this.about );
@@ -305,9 +294,6 @@ public class Window {
         this.menu.add( this.help );
 
         this.container.setLayout( new BorderLayout( 10,0 ) );
-
-
-        HideNotificationPanel();
 
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
         //Add all our content to the main window
@@ -323,11 +309,34 @@ public class Window {
 
     //Remove these two functions eventually
     private void ShowNotificationPanel ( String value ) {
+        this.notificationPanel.setVisible( true );
+        this.notif_text.setText( "'" + value + "' copied to clip history.");
 
+        //Grab the length the notification should show.
+        int length;
+
+        switch ( Preferences.GetPrefString("notification-length" ) ) {
+            case "longer":
+                length = 3000;
+                break;
+            case "medium":
+                length = 2000;
+                break;
+            default:
+                length = 1000;
+                break;
+        }
+
+        timout.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                HideNotificationPanel();
+            }
+        },length );
     }
 
     private void HideNotificationPanel () {
-
+        this.notificationPanel.setVisible( false );
     }
 
     //Takes in the root menu item and builds out all the preference options.

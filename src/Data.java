@@ -58,7 +58,7 @@ public class Data {
         return clips;
     }
 
-    public void UpdateData ( JSONArray clips ) {
+    public JSONArray UpdateData ( JSONArray clips ) {
         try {
             FileOutputStream out = new FileOutputStream( "clips.data" );
             data.put( "clips",clips );
@@ -72,6 +72,8 @@ public class Data {
         } catch ( Exception e ) {
             System.out.println( e.getMessage() );
         }
+
+        return clips;
     }
 
     //Takes in a file path and writes a backup of the json file to the given directory.
