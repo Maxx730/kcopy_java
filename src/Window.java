@@ -348,7 +348,7 @@ public class Window {
             truncated = value;
         }
 
-        this.notif_text.setText( "'" + truncated + "' copied to clip history.");
+        this.notif_text.setText("'" + truncated + "' copied to clip history.");
 
         //Grab the length the notification should show.
         int length;
@@ -399,6 +399,9 @@ public class Window {
         notification_length.setIcon(new ImageIcon( new ImageIcon( getClass().getResource("images/37" +
                 ".png") ).getImage().getScaledInstance( 16,16,Image.SCALE_SMOOTH )));
         ButtonGroup group = new ButtonGroup();
+
+        JMenuItem historyLength = new JMenuItem("History Length");
+        historyLength.setBorder(space);
 
         //Create length radio buttons.
         JRadioButtonMenuItem shorter = new JRadioButtonMenuItem( "Short" );
@@ -520,6 +523,7 @@ public class Window {
         prefs.add( show_notif );
         prefs.add( notification_length );
         prefs.add( new JSeparator(SwingConstants.HORIZONTAL) );
+        prefs.add( historyLength );
         prefs.add( clear_hist );
     }
 }
