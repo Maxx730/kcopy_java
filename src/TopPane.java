@@ -18,7 +18,6 @@ public class TopPane extends JPanel {
     public TopPane ( SearchInterface search ) {
         super();
         setLayout( new BorderLayout() );
-        setBorder( BorderFactory.createMatteBorder(1,0,1,0,Color.decode("#C4C4C4")) );
 
         this.lowerPanel = new JPanel( );
         this.lowerPanel.setLayout( new BoxLayout( lowerPanel,BoxLayout.X_AXIS ) );
@@ -28,7 +27,6 @@ public class TopPane extends JPanel {
         //Panel that contains the actual search field.
         this.innerPannel = new JPanel();
         this.innerPannel.setLayout( new GridBagLayout() );
-        this.innerPannel.setBorder( BorderFactory.createEmptyBorder( 10,0,10,10 ));
 
         this.constraints = new GridBagConstraints();
         this.constraints.weightx = 1;
@@ -36,7 +34,7 @@ public class TopPane extends JPanel {
 
         //Create the search field.
         this.search_field = new JTextField();
-        this.search_field.setBorder( BorderFactory.createCompoundBorder( this.search_field.getBorder(),
+        this.search_field.setBorder( BorderFactory.createCompoundBorder( BorderFactory.createEmptyBorder(0,0,0,0),
                 BorderFactory.createEmptyBorder( 6,8,6,8 ) ));
         this.search_field.addFocusListener(new FocusListener() {
             @Override
@@ -75,7 +73,6 @@ public class TopPane extends JPanel {
 
 
         this.add( this.innerPannel,BorderLayout.NORTH );
-        this.innerPannel.add( new JLabel( search_icon ),this.constraints );
         this.constraints.weightx = 12;
         this.innerPannel.add( this.search_field,this.constraints );
     }

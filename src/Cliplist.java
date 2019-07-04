@@ -17,6 +17,7 @@ public class Cliplist extends JList< JSONObject > {
         super();
         model = new DefaultListModel<>();
         setCellRenderer( new ClipRenderer() );
+        setBorder(BorderFactory.createEmptyBorder(0,0,0,0));
         this.ref = reference;
         this.change = change;
 

@@ -25,6 +25,13 @@ public class NotificationPanel extends JPanel {
     }
 
     public void SetMessage ( String value ) {
-        message.setText( "'" + value + "' saved to history." );
+        String truncated;
+
+        if(value.length() > 100){
+            truncated = "truncated";
+        } else {
+            truncated = value;
+        }
+        message.setText( "'" + truncated + "' saved to history." );
     }
 }

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="kCopy">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/out/artifacts/kCopy_jar/kCopy.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

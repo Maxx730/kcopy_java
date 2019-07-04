@@ -1,13 +1,18 @@
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -105,13 +110,13 @@ public class Window {
         //Create the actual application frame.
         this.frame = new JFrame("kCopy" );
         this.frame.setMinimumSize( new Dimension( 400,600 ) );
+        ImageIcon icon = new ImageIcon("images/icon.ico");
+        this.frame.setIconImage(icon.getImage());
         this.menu = new JMenuBar();
 
-        Border spacing = BorderFactory.createEmptyBorder( 8,10,8,10 );
 
         //Create our top level menu items.
         this.file = new JMenu( "File" );
-        this.file.setBorder( spacing );
         this.imp = new JMenuItem( " Save          Ctrl+S" );
         this.imp.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
         this.imp.setIcon(new ImageIcon( new ImageIcon( getClass().getResource("images/45" +
@@ -122,6 +127,7 @@ public class Window {
                 ".png") ).getImage().getScaledInstance( 16,16,Image.SCALE_SMOOTH )));
         this.exit = new JMenuItem( " Exit" );
         this.exit.setIcon( new ImageIcon( getClass().getResource( "images/50.png" ) ) );
+        this.exit.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
 
         //First menu action listeners.
         this.exit.addActionListener(new ActionListener() {
@@ -170,7 +176,6 @@ public class Window {
 
         //Add the edit menu with submenu items.
         this.edit = new JMenu( "Edit" );
-        this.edit.setBorder( spacing );
         this.about = new JMenuItem( " About" );
         this.about.setIcon(new ImageIcon( new ImageIcon( getClass().getResource("images/02" +
                 ".png") ).getImage().getScaledInstance( 16,16,Image.SCALE_SMOOTH )));
@@ -181,12 +186,23 @@ public class Window {
                 JDialog aboutd = new JDialog( frame,"About" );
 
                 aboutd.getContentPane().setLayout( new BorderLayout() );
-                aboutd.getContentPane().add( new JLabel("<html><body><center>TEST</center></body></html>"),
-                        BorderLayout.CENTER );
                 aboutd.getContentPane().setBackground( Color.WHITE );
                 aboutd.setResizable( false );
                 aboutd.setLocationRelativeTo( frame );
-                aboutd.setSize( new Dimension( 300,200 ) );
+                aboutd.setSize( new Dimension( 300,90 ) );
+
+                JPanel panel = new JPanel();
+                panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+                panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+
+                JLabel version = new JLabel("kCopy v1.0.0");
+                version.setBackground(Color.RED);
+                panel.add(version);
+                panel.add(new JLabel("Created by John M Kinghorn"));
+                panel.add(new JLabel("View on Github"));
+                aboutd.add(new JPanel(),BorderLayout.WEST);
+                aboutd.add(new JPanel(),BorderLayout.EAST);
+                aboutd.add(panel,BorderLayout.CENTER);
                 aboutd.setVisible( true );
             }
         });
@@ -216,7 +232,6 @@ public class Window {
 
         //Create the help menu
         this.help = new JMenu("Help" );
-        this.help.setBorder( spacing );
 
         //Grab the actual content in the window below the menu.
         this.container = this.frame.getContentPane();
@@ -258,7 +273,9 @@ public class Window {
         this.scrollpane = new JScrollPane();
         this.scrollpane.setHorizontalScrollBarPolicy( ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
         this.scrollpane.setViewportBorder( null );
-        this.scrollpane.setSize( frame.getSize().width,frame.getSize().height - 130 );
+        this.scrollpane.setBorder(BorderFactory.createMatteBorder(1,0,0,0,Color.getColor("#F1F1F1")));
+        this.scrollpane.setSize( frame.getSize().width - 15,frame.getSize().height - this.topPanel.getHeight() - 60 );
+        this.list.requestFocus();
 
         //Create our tabs widget to house the favorites and clips panels
         ClipTabs tabs = new ClipTabs( JTabbedPane.TOP );
@@ -272,7 +289,7 @@ public class Window {
         this.notificationPanel = new JPanel();
         this.notificationPanel.setSize( new Dimension( 100,100 ) );
         this.notificationPanel.setBackground( new Color( 0,0,0,200 ) );
-        this.notificationPanel.setBounds( 0,frame.getSize().height - 170,frame.getSize().width,40 );
+        this.notificationPanel.setBounds( 0,frame.getSize().height - 75,frame.getSize().width,40 );
         this.notificationPanel.setLayout( new BorderLayout() );
 
         JLabel notif_frame = new JLabel(new ImageIcon( getClass().getResource("images/43.png") ) );
@@ -300,17 +317,35 @@ public class Window {
         frame.setJMenuBar( this.menu );
         frame.add( this.topPanel,BorderLayout.NORTH );
         frame.add( this.layered,BorderLayout.CENTER );
-        frame.setResizable( false );
         frame.setBounds( 0,0,frame.getSize().width, frame.getSize().height );
         frame.setLocation( (d.width / 2) - (frame.getSize().width / 2),(d.height / 2) - (frame.getSize().height/2) );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setIconImage(Toolkit.getDefaultToolkit().getImage("./images/45.png"));
         frame.setVisible( true );
+
+        frame.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                super.componentResized(e);
+                scrollpane.setSize( frame.getSize().width - 15,frame.getSize().height - topPanel.getHeight() - 60 );
+                notificationPanel.setBounds( 0,frame.getSize().height - 125,frame.getSize().width,40 );
+            }
+        });
     }
 
     //Remove these two functions eventually
     private void ShowNotificationPanel ( String value ) {
+        String truncated;
         this.notificationPanel.setVisible( true );
-        this.notif_text.setText( "'" + value + "' copied to clip history.");
+
+        //Truncate the copied string if it is longer than a certain amount for the notification.
+        if(value.length() > 100){
+            truncated = value.substring(0,50) + "...";
+        } else {
+            truncated = value;
+        }
+
+        this.notif_text.setText( "'" + truncated + "' copied to clip history.");
 
         //Grab the length the notification should show.
         int length;
