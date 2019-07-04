@@ -7,10 +7,7 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -31,12 +28,11 @@ public class Window {
     private JScrollPane scrollpane;
     private Timer timout;
     private JLayeredPane layered;
-    private JLabel notif_text,notif_message;
+    private JLabel notif_text;
 
     //List of clip objects
     private JSONArray clips;
     private Clipboard clipboard;
-    private NotificationPanel notif_panel;
 
     public Window () {
 
@@ -180,30 +176,37 @@ public class Window {
         this.about.setIcon(new ImageIcon( new ImageIcon( getClass().getResource("images/02" +
                 ".png") ).getImage().getScaledInstance( 16,16,Image.SCALE_SMOOTH )));
         this.about.setBorder( BorderFactory.createEmptyBorder( 4,6,4,6 ));
+
+        JDialog aboutd = new JDialog( frame,"About" );
+
         this.about.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JDialog aboutd = new JDialog( frame,"About" );
+                if(!aboutd.isVisible()){
+                    aboutd.getContentPane().setLayout( new BorderLayout() );
+                    aboutd.getContentPane().setBackground( Color.WHITE );
+                    aboutd.setResizable( false );
+                    aboutd.setLocationRelativeTo( frame );
+                    aboutd.setSize( new Dimension( 300,115 ) );
 
-                aboutd.getContentPane().setLayout( new BorderLayout() );
-                aboutd.getContentPane().setBackground( Color.WHITE );
-                aboutd.setResizable( false );
-                aboutd.setLocationRelativeTo( frame );
-                aboutd.setSize( new Dimension( 300,90 ) );
+                    JPanel panel = new JPanel();
+                    panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+                    panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
 
-                JPanel panel = new JPanel();
-                panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
-                panel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+                    JLabel version = new JLabel("<html><div style=\"width:200px;padding: 3px;\"><center>kCopy v1.0.0</center></div></html>");
+                    version.setBackground(Color.RED);
+                    panel.add(version);
+                    panel.add(new JLabel("<html><div style=\"width:200px;padding:3px;\"><center>Created by John M Kinghorn</center></div></html>"));
+                    panel.add(new JLabel("<html><div style=\"width:200px;padding:3px;\"><center>View on Github</center></div></html>"));
+                    aboutd.add(new JPanel(),BorderLayout.WEST);
+                    aboutd.add(new JPanel(),BorderLayout.EAST);
+                    aboutd.add(panel,BorderLayout.CENTER);
+                    aboutd.setVisible( true );
+                    aboutd.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+                } else {
+                    aboutd.requestFocus();
+                }
 
-                JLabel version = new JLabel("kCopy v1.0.0");
-                version.setBackground(Color.RED);
-                panel.add(version);
-                panel.add(new JLabel("Created by John M Kinghorn"));
-                panel.add(new JLabel("View on Github"));
-                aboutd.add(new JPanel(),BorderLayout.WEST);
-                aboutd.add(new JPanel(),BorderLayout.EAST);
-                aboutd.add(panel,BorderLayout.CENTER);
-                aboutd.setVisible( true );
             }
         });
 

@@ -10,6 +10,7 @@ public class ClipRenderer extends JPanel implements ListCellRenderer<JSONObject>
     //Initialize the parts of the cell here to help with performance.
     JLabel id = new JLabel( "ID" );
     JLabel value = new JLabel( "VALUE" );
+    JLabel star = new JLabel("STAR");
     JSeparator vert = new JSeparator( JSeparator.VERTICAL );
 
     public ClipRenderer () {
@@ -43,6 +44,7 @@ public class ClipRenderer extends JPanel implements ListCellRenderer<JSONObject>
         add( id );
         add( vert );
         add( value );
+        add( star );
 
         return this;
     }
